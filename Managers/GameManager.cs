@@ -148,6 +148,9 @@ namespace CheckMate.Managers
             Rectangle rect;
             SpriteFont font;
 
+            // Draw background
+            spriteBatch.Draw(_assetManager.LoadTexture("Wood"), _assetManager.LoadRectangle(0, 0, Constants.WIN_SIZE, Constants.WIN_SIZE, false), Color.White);
+
             // Draw board
             for (int rank = 0; rank < Constants.SQUARE_NUM; rank++)
             {
@@ -164,7 +167,7 @@ namespace CheckMate.Managers
                     font = _assetManager.Fonts[2];
 
                     if (file == 7)
-                        spriteBatch.DrawString(font, rankStr, new Vector2(rect.Right - 5, rect.Bottom - 5) - font.MeasureString(rankStr), Color.Black);
+                        spriteBatch.DrawString(font, rankStr, new Vector2(rect.Right - 5, rect.Bottom + 5) - font.MeasureString(rankStr), Color.Black);
 
                     if (rank == 0)
                         spriteBatch.DrawString(font, fileStr, new Vector2(rect.Left + 5, rect.Top + 5), Color.Black);
@@ -235,7 +238,7 @@ namespace CheckMate.Managers
             }
             else
             {
-                spriteBatch.Draw(_assetManager.LoadContent("Background"), _assetManager.LoadRectangle(0, 0, Constants.WIN_SIZE, Constants.WIN_SIZE, false), Color.White);
+                spriteBatch.Draw(_assetManager.LoadTexture("Background"), _assetManager.LoadRectangle(0, 0, Constants.WIN_SIZE, Constants.WIN_SIZE, false), Color.White);
                 spriteBatch.Draw(_assetManager.Tiles[TileType.Paused], _assetManager.LoadRectangle(0, 0, Constants.WIN_SIZE, Constants.WIN_SIZE, false), Color.White);
             }
 

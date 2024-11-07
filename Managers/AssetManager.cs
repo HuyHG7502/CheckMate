@@ -58,14 +58,6 @@ namespace CheckMate.Managers
             };
         }
 
-        private Texture2D LoadColoredTexture(Color color, float alpha = 1f)
-        {
-            Texture2D texture = new Texture2D(_graphics, 1, 1);
-            texture.SetData(new[] { new Color(color, alpha) });
-
-            return texture;
-        }
-
         private void LoadFonts()
         {
             Fonts = new Dictionary<int, SpriteFont>();
@@ -87,8 +79,16 @@ namespace CheckMate.Managers
             }
         }
 
+        public Texture2D LoadColoredTexture(Color color, float alpha = 1f)
+        {
+            Texture2D texture = new Texture2D(_graphics, 1, 1);
+            texture.SetData(new[] { new Color(color, alpha) });
+
+            return texture;
+        }
+
         // Load miscellaneous Content textures by name
-        public Texture2D LoadContent(string name)
+        public Texture2D LoadTexture(string name)
             => _content.Load<Texture2D>(name);
 
         // Load Rectangle for rendering textures

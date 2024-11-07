@@ -26,4 +26,5 @@ A simple C# project that simulates a semi-fully functional Chess game.
 * **Enhanced Graphics**: Improve visual elements and animations to create a more engaging user experience, with proper Menus and Logs.
 
 ##
-![CheckMate Screenshot](image.png)
+![CheckMate Screenshot 1](image-1.png)
+![CheckMate Screenshot 2](image-2.png)

@@ -74,7 +74,7 @@
     {
         public const int WIN_SIZE = 800;
 
-        public const int WIN_PADDING = 20;
+        public const int WIN_PADDING = 25;
 
         public const int BOARD_SIZE = WIN_SIZE - WIN_PADDING * 2;
 

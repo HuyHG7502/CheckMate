@@ -43,6 +43,8 @@ namespace CheckMate
 
         protected override void Initialize()
         {
+            Window.Title = "Check Mate";
+
             // TODO: Add your initialization logic here
             _graphics.PreferredBackBufferWidth = Constants.WIN_SIZE;
             _graphics.PreferredBackBufferHeight = Constants.WIN_SIZE;
