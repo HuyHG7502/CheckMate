@@ -1,11 +1,10 @@
 ﻿using CheckMate.Entities;
 using CheckMate.Pieces;
 using CheckMate.Players;
+using CheckMate.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace CheckMate.Managers
 {
@@ -131,7 +130,7 @@ namespace CheckMate.Managers
             if (_board.MakeMove(move, out Piece captured))
             {
                 // Logging
-                Debug.WriteLine($"Move: {move.Moved} from {move.From} to {move.To} - {move.Captured}");
+                Debug.WriteLine($"#{_stateManager.Moves.Count() + 1}: {Util.GetPiece(move.Moved)} from {move.From} to {move.To} - {Util.GetPiece(move.Captured)}");
                 // Push latest move to Move stack
                 _stateManager.Moves.Push(move);
                 _stateManager.ChessState = ChessState.Default;
@@ -145,111 +144,112 @@ namespace CheckMate.Managers
 
         public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
+            Dictionary<int, SpriteFont> fonts = _assetManager.Fonts;
             Rectangle rect;
-            SpriteFont font;
+            Rectangle screen = new(0, 0, Constants.WIN_WIDTH, Constants.WIN_HEIGHT);
 
             // Draw background
-            spriteBatch.Draw(_assetManager.LoadTexture("Wood"), _assetManager.LoadRectangle(0, 0, Constants.WIN_SIZE, Constants.WIN_SIZE, false), Color.White);
-
-            // Draw board
-            for (int rank = 0; rank < Constants.SQUARE_NUM; rank++)
-            {
-                for (int file = 0; file < Constants.SQUARE_NUM; file++)
-                {
-                    Texture2D tile = (rank + file) % 2 == 0 ? _assetManager.Tiles[TileType.White] : _assetManager.Tiles[TileType.Black];
-                    rect = _assetManager.LoadRectangle(rank, file, Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
-                    spriteBatch.Draw(tile, rect, Color.White);
-
-                    string rankStr = new Square(rank, file).ToRank();
-                    string fileStr = new Square(rank, file).ToFile();
-
-                    // Draw square ranks and files
-                    font = _assetManager.Fonts[2];
-
-                    if (file == 7)
-                        spriteBatch.DrawString(font, rankStr, new Vector2(rect.Right - 5, rect.Bottom + 5) - font.MeasureString(rankStr), Color.Black);
-
-                    if (rank == 0)
-                        spriteBatch.DrawString(font, fileStr, new Vector2(rect.Left + 5, rect.Top + 5), Color.Black);
-                }
-            }
-
-            // Draw selected square
-            if (!_stateManager.SelectedSquare.IsNull())
-            {
-                rect = _assetManager.LoadRectangle(_stateManager.SelectedSquare.Rank, _stateManager.SelectedSquare.File,
-                    Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
-                spriteBatch.Draw(_assetManager.Tiles[TileType.Selected], rect, Color.White * 0.8f);
-
-                // Draw allowed moves
-                foreach (var move in _stateManager.AllowedMoves)
-                {
-                    rect = _assetManager.LoadRectangle(move.To.Rank, move.To.File,
-                        Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
-                    spriteBatch.Draw(_assetManager.Tiles[TileType.Allowed], rect, Color.White * 0.8f);
-                }
-
-                // Draw disallowed moves
-                foreach (var move in _stateManager.DisallowedMoves)
-                {
-                    rect = _assetManager.LoadRectangle(move.To.Rank, move.To.File,
-                        Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
-                    spriteBatch.Draw(_assetManager.Tiles[TileType.Disallowed], rect, Color.White * 0.8f);
-                }
-            }
-
-            // Draw checked king
-            if (_stateManager.ChessState == ChessState.WhiteCheck || _stateManager.ChessState == ChessState.BlackCheck)
-            {
-                PieceColour colour = _stateManager.ChessState == ChessState.WhiteCheck ? PieceColour.White : PieceColour.Black;
-                Square kingPos = MoveValidator.LocateKing(_board, colour);
-
-                rect = _assetManager.LoadRectangle(kingPos.Rank, kingPos.File,
-                    Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
-                spriteBatch.Draw(_assetManager.Tiles[TileType.Danger], rect, Color.White);
-            }
-
-            // Draw pieces
-            foreach (var square in _board.Squares)
-            {
-                if (square.IsOccupied())
-                {
-                    int rank = square.Rank * Constants.SQUARE_SIZE + (Constants.SQUARE_SIZE - Constants.PIECE_SIZE) / 2 + Constants.WIN_PADDING;
-                    int file = square.File * Constants.SQUARE_SIZE + (Constants.SQUARE_SIZE - Constants.PIECE_SIZE) / 2 + Constants.WIN_PADDING;
-
-                    rect = new(rank, file, Constants.PIECE_SIZE, Constants.PIECE_SIZE);
-                    spriteBatch.Draw(_assetManager.Pieces[(int)square.Piece.Colour * (int)square.Piece.Type], rect, Color.White);
-                }
-            }
+            spriteBatch.Draw(_assetManager.LoadTexture("Background"), screen, Color.White);
+            spriteBatch.Draw(_assetManager.Tiles[TileType.Paused], screen, Color.White);
 
             if (_stateManager.GameState == GameState.Playing)
             {
+                // Draw board
+                for (int rank = 0; rank < Constants.SQUARE_NUM; rank++)
+                {
+                    for (int file = 0; file < Constants.SQUARE_NUM; file++)
+                    {
+                        Texture2D tile = (rank + file) % 2 == 0 ? _assetManager.Tiles[TileType.White] : _assetManager.Tiles[TileType.Black];
+                        rect = _assetManager.LoadSquare(rank, file, Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
+                        spriteBatch.Draw(tile, rect, Color.White);
+
+                        string rankStr = new Square(rank, file).ToRank();
+                        string fileStr = new Square(rank, file).ToFile();
+
+                        // Draw square ranks and files
+                        if (file == 7)
+                            spriteBatch.DrawString(fonts[2], rankStr, new Vector2(rect.Right - 5, rect.Bottom - 5) - fonts[2].MeasureString(rankStr), Color.Black);
+
+                        if (rank == 0)
+                            spriteBatch.DrawString(fonts[2], fileStr, new Vector2(rect.Left + 5, rect.Top + 5), Color.Black);
+                    }
+                }
+
+                // Draw selected square
+                if (!_stateManager.SelectedSquare.IsNull())
+                {
+                    rect = _assetManager.LoadSquare(_stateManager.SelectedSquare.Rank, _stateManager.SelectedSquare.File,
+                        Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
+                    spriteBatch.Draw(_assetManager.Tiles[TileType.Selected], rect, Color.White * 0.8f);
+
+                    // Draw allowed moves
+                    foreach (var move in _stateManager.AllowedMoves)
+                    {
+                        rect = _assetManager.LoadSquare(move.To.Rank, move.To.File,
+                            Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
+                        spriteBatch.Draw(_assetManager.Tiles[TileType.Allowed], rect, Color.White * 0.8f);
+                    }
+
+                    // Draw disallowed moves
+                    foreach (var move in _stateManager.DisallowedMoves)
+                    {
+                        rect = _assetManager.LoadSquare(move.To.Rank, move.To.File,
+                            Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
+                        spriteBatch.Draw(_assetManager.Tiles[TileType.Disallowed], rect, Color.White * 0.8f);
+                    }
+                }
+
+                // Draw checked king
+                if (_stateManager.ChessState == ChessState.WhiteCheck || _stateManager.ChessState == ChessState.BlackCheck)
+                {
+                    PieceColour colour = _stateManager.ChessState == ChessState.WhiteCheck ? PieceColour.White : PieceColour.Black;
+                    Square kingPos = MoveValidator.LocateKing(_board, colour);
+
+                    rect = _assetManager.LoadSquare(kingPos.Rank, kingPos.File,
+                        Constants.SQUARE_SIZE, Constants.SQUARE_SIZE);
+                    spriteBatch.Draw(_assetManager.Tiles[TileType.Danger], rect, Color.White);
+                }
+
+                // Draw pieces
+                foreach (var square in _board.Squares)
+                {
+                    if (square.IsOccupied())
+                    {
+                        int rank = square.Rank * Constants.SQUARE_SIZE + (Constants.SQUARE_SIZE - Constants.PIECE_SIZE) / 2 + Constants.WIN_PADDING;
+                        int file = square.File * Constants.SQUARE_SIZE + (Constants.SQUARE_SIZE - Constants.PIECE_SIZE) / 2 + Constants.WIN_PADDING;
+
+                        rect = new(rank, file, Constants.PIECE_SIZE, Constants.PIECE_SIZE);
+                        spriteBatch.Draw(_assetManager.Pieces[(int)square.Piece.Colour * (int)square.Piece.Type], rect, Color.White);
+                    }
+                }
+
+                // Draw side menu
+                // spriteBatch.Draw(_assetManager.LoadColoredTexture(Color.Gray),
+                //    _assetManager.LoadRectangle(Constants.SQUARE_NUM * Constants.SQUARE_SIZE + Constants.WIN_PADDING, 0, Constants.MENU_SIZE, Constants.BOARD_SIZE, true, false), Color.White);
+
+
                 // Track AI calculation time
                 calculationTime += gameTime.ElapsedGameTime.TotalSeconds;
                 if (calculationTime > 0.5 && !_stateManager.IsPlayerTurn())
                 {
-                    spriteBatch.Draw(_assetManager.Tiles[TileType.Paused], _assetManager.LoadRectangle(0, 0, Constants.WIN_SIZE, Constants.WIN_SIZE, false), Color.White * 0.5f);
+                    spriteBatch.Draw(_assetManager.Tiles[TileType.Paused], screen, Color.White * 0.5f);
 
                     string str = "Calculating...";
-                    Vector2 pos = _assetManager.LoadString(out font, 4, str);
+                    Vector2 pos = _assetManager.LoadString(fonts[4], str, screen);
 
-                    spriteBatch.DrawString(font, str, pos, Color.White);
+                    spriteBatch.DrawString(fonts[4], str, pos, Color.White);
                 }
             }
-            else
-            {
-                spriteBatch.Draw(_assetManager.LoadTexture("Background"), _assetManager.LoadRectangle(0, 0, Constants.WIN_SIZE, Constants.WIN_SIZE, false), Color.White);
-                spriteBatch.Draw(_assetManager.Tiles[TileType.Paused], _assetManager.LoadRectangle(0, 0, Constants.WIN_SIZE, Constants.WIN_SIZE, false), Color.White);
-            }
 
+            /*
             if (_stateManager.GameState == GameState.Paused)
             {
                 string str = "Press Enter to resume, Escape to exit";
-                Vector2 pos = _assetManager.LoadString(out font, 3, str);
+                Vector2 pos = _assetManager.LoadString(fonts[4], str, screen);
 
-                spriteBatch.DrawString(font, str, pos, Color.Khaki);
+                spriteBatch.DrawString(fonts[4], str, pos, Color.Khaki);
             }
-
+            
             if (_stateManager.GameState == GameState.Start || _stateManager.GameState == GameState.End)
             {
                 Vector2 pos;
@@ -276,20 +276,22 @@ namespace CheckMate.Managers
                     play = "Press Space to replay";
                 }
 
-                pos = _assetManager.LoadString(out font, 5, head, 0, 150, true, false);
-                spriteBatch.DrawString(font, head, pos, Color.Gold);
+                pos = _assetManager.LoadString(fonts[5], head, new Rectangle(0, 150, screen.Width, screen.Height), centerY: false);
+                spriteBatch.DrawString(fonts[5], head, pos, Color.Gold);
 
-                pos = _assetManager.LoadString(out font, 3, info, 200, 250, false, false);
-                spriteBatch.DrawString(font, info, pos, Color.White);
+                pos = _assetManager.LoadString(fonts[3], info, new Rectangle(200, 250, screen.Width, screen.Height), false, false);
+                spriteBatch.DrawString(fonts[3], info, pos, Color.White);
 
-                pos = _assetManager.LoadString(out font, 4, play, 0, 600, true, false);
-                spriteBatch.DrawString(font, play, pos, Color.Khaki);
+                pos = _assetManager.LoadString(fonts[4], play, new Rectangle(0, 600, screen.Width, screen.Height), centerY: false);
+                spriteBatch.DrawString(fonts[4], play, pos, Color.Khaki);
             }
+            */
         }
 
         private void SwitchTurn()
         {
             _stateManager.CurrentPlayer = Util.GetOpponent(_stateManager.CurrentPlayer);
+            _stateManager.Clear();
 
             _current = _players[_stateManager.CurrentPlayer];
 

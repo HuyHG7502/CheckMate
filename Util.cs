@@ -6,11 +6,34 @@ namespace CheckMate
 {
     public static class Util
     {
+        public static Dictionary<PieceType, string> TypeMap = new()
+        {
+            { PieceType.King,   "k" },
+            { PieceType.Queen,  "q" },
+            { PieceType.Rook,   "r" },
+            { PieceType.Bishop, "b" },
+            { PieceType.Knight, "n" },
+            { PieceType.Pawn,   "p" },
+            { PieceType.Null,   "" },
+        };
+
+        public static Dictionary<PieceColour, string> ColourMap = new()
+        {
+            { PieceColour.White, "w" },
+            { PieceColour.Black, "b" },
+            { PieceColour.Null,  "" }
+        };
+
         public static bool IsMouseClicked(MouseState current, MouseState previous)
             => current.LeftButton == ButtonState.Pressed && previous.LeftButton == ButtonState.Released;
 
         public static bool IsKeyPressed(Keys key, KeyboardState current, KeyboardState previous)
             => current.IsKeyDown(key) && !previous.IsKeyDown(key);
+
+        public static void AwaitMouseClick()
+        {
+            while (Mouse.GetState().LeftButton == ButtonState.Pressed) { }
+        }
 
         public static PieceColour GetOpponent(PieceColour colour)
             => colour == PieceColour.White ? PieceColour.Black : PieceColour.White;
@@ -52,5 +75,11 @@ namespace CheckMate
 
             return score;
         }
+
+        public static string GetPiece(PieceColour colour, PieceType type)
+            => ColourMap[colour] + TypeMap[type];
+
+        public static string GetPiece(Piece piece)
+            => ColourMap[piece.Colour] + TypeMap[piece.Type];
     }
 }

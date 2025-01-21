@@ -23,7 +23,7 @@ A simple C# project that simulates a semi-fully functional Chess game.
 
 * **More AI**: Fine-tune the AI with added strategies or neural networks for more adjustable difficulty settings.
 
-* **Enhanced Graphics**: Improve visual elements and animations to create a more engaging user experience, with proper Menus and Logs.
+* **Enhanced Graphics**: Improve visual elements and animations to create a more engaging user experience, with proper Move Logs.
 
 ##
 ![CheckMate Screenshot 1](image-1.png)

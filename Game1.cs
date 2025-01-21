@@ -1,10 +1,8 @@
 ﻿using CheckMate.Managers;
+using CheckMate.UI;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace CheckMate
 {
@@ -15,6 +13,7 @@ namespace CheckMate
         
         private SpriteBatch _spriteBatch;
         private GameManager _gameManager;
+        private Menu _menu;
 
         Task _task;
         KeyboardState _previousKey;
@@ -46,8 +45,8 @@ namespace CheckMate
             Window.Title = "Check Mate";
 
             // TODO: Add your initialization logic here
-            _graphics.PreferredBackBufferWidth = Constants.WIN_SIZE;
-            _graphics.PreferredBackBufferHeight = Constants.WIN_SIZE;
+            _graphics.PreferredBackBufferWidth = Constants.WIN_WIDTH;
+            _graphics.PreferredBackBufferHeight = Constants.WIN_HEIGHT;
 
             _graphics.ApplyChanges();
 
@@ -55,6 +54,7 @@ namespace CheckMate
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             _gameManager = new GameManager(_state, _asset);
+            _menu = new Menu(_gameManager, _state, _asset, () => Exit());
 
             base.Initialize();
         }
@@ -74,6 +74,7 @@ namespace CheckMate
             if (IsActive)
             {
                 CheckInput(gameTime);
+                _menu.Update(gameTime);
 
                 if (_state.GameState == GameState.Playing && _task.IsCompleted)
                 {
@@ -88,12 +89,13 @@ namespace CheckMate
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Sienna);
+            GraphicsDevice.Clear(Color.Black);
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
             _gameManager.Draw(_spriteBatch, gameTime);
+            _menu.Draw(_spriteBatch, gameTime);
 
             _spriteBatch.End();
 
@@ -133,6 +135,7 @@ namespace CheckMate
                 return false;
             }
 
+            /*
             // On Start screen
             if (_state.GameState == GameState.Start)
             {
@@ -153,6 +156,7 @@ namespace CheckMate
                     if (IsKeyAllowed(depth.Key) && Util.IsKeyPressed(depth.Key, currentKey, _previousKey))
                         _state.Depth = depth.Value;
             }
+            */
 
             // Escape key to pause or exit game
             if (IsKeyAllowed(Keys.Escape) && Util.IsKeyPressed(Keys.Escape, currentKey, _previousKey))

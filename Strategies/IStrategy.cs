@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using CheckMate.Entities;
 using CheckMate.Managers;
 
-namespace CheckMate
+namespace CheckMate.Strategies
 {
     public interface IStrategy
     {

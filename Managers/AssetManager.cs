@@ -7,6 +7,7 @@ using System.Linq;
 
 using SpriteFontPlus;
 using System.IO;
+using System.Diagnostics;
 
 namespace CheckMate.Managers
 {
@@ -38,8 +39,8 @@ namespace CheckMate.Managers
             {
                 if (pieceType == PieceType.Null) continue;
 
-                Pieces.Add((int)pieceType, _content.Load<Texture2D>($"White{pieceType.ToString()}"));
-                Pieces.Add(-(int)pieceType, _content.Load<Texture2D>($"Black{pieceType.ToString()}"));
+                Pieces.Add((int)pieceType, _content.Load<Texture2D>($"w{Util.TypeMap[pieceType]}"));
+                Pieces.Add(-(int)pieceType, _content.Load<Texture2D>($"b{Util.TypeMap[pieceType]}"));
             }
         }
 
@@ -48,33 +49,31 @@ namespace CheckMate.Managers
         {
             Tiles = new Dictionary<TileType, Texture2D>
             {
-                { TileType.White, LoadColoredTexture(Color.Beige) },
-                { TileType.Black, LoadColoredTexture(Color.Peru) },
+                { TileType.White, LoadColoredTexture(Color.Ivory) },
+                { TileType.Black, LoadColoredTexture(Color.Tan) },
                 { TileType.Danger, LoadColoredTexture(Color.Crimson) },
                 { TileType.Selected, LoadColoredTexture(Color.Gold) },
-                { TileType.Allowed, LoadColoredTexture(Color.Olive) },
-                { TileType.Disallowed, LoadColoredTexture(Color.Maroon) },
-                { TileType.Paused, LoadColoredTexture(Color.Black, 0.5f) },
+                { TileType.Allowed, LoadColoredTexture(Color.YellowGreen) },
+                { TileType.Disallowed, LoadColoredTexture(Color.IndianRed) },
+                { TileType.Paused, LoadColoredTexture(Color.Black, 0.6f) },
             };
         }
 
         private void LoadFonts()
         {
             Fonts = new Dictionary<int, SpriteFont>();
-            foreach (int i in Enumerable.Range(2, 5))
+            foreach (int i in Enumerable.Range(1, 10))
             {
                 var font = TtfFontBaker.Bake(File.ReadAllBytes(Path.Combine("Assets/Font.ttf")),
                     i * 10, 1024, 1024,
-                    new[]
-                    {
+                    [
                         CharacterRange.BasicLatin,
                         CharacterRange.Latin1Supplement,
                         CharacterRange.LatinExtendedA,
                         CharacterRange.Cyrillic
-                    }
+                    ]
                 );
                 SpriteFont spriteFont = font.CreateSpriteFont(_graphics);
-                spriteFont.LineSpacing = (int)(spriteFont.LineSpacing * 1.5);
                 Fonts.Add(i, spriteFont);
             }
         }
@@ -92,21 +91,19 @@ namespace CheckMate.Managers
             => _content.Load<Texture2D>(name);
 
         // Load Rectangle for rendering textures
-        public Rectangle LoadRectangle(int x, int y, int width, int height, bool padding = true)
-        {
-            return padding
-                ? new Rectangle(x * width + Constants.WIN_PADDING, y * height + Constants.WIN_PADDING, width, height)
-                : new Rectangle(x * width, y * height, width, height);
-        }
+        public Rectangle LoadRectangle(int x, int y, int width, int height)
+            => new(x, y, width, height);
 
-        // Load Vector2 for rendering strings
-        public Vector2 LoadString(out SpriteFont font, int key, string text, int x = 0, int y = 0, bool centerX = true, bool centerY = true)
+        public Rectangle LoadSquare(int x, int y, int width, int height)
+            => new(x * width + Constants.WIN_PADDING, y * height + Constants.WIN_PADDING, width, height);
+
+        // Load Vector2 for rendering centred strings
+        public Vector2 LoadString(SpriteFont font, string text, Rectangle rect, bool centerX = true, bool centerY = true)
         {
-            font = Fonts[key];
             Vector2 size = font.MeasureString(text);
-            Vector2 pos = new();
-            pos.X = centerX ? (Constants.WIN_SIZE - size.X) / 2 : x;
-            pos.Y = centerY ? (Constants.WIN_SIZE - size.Y) / 2 : y;
+            Vector2 pos = new(rect.X, rect.Y);
+            if (centerX) pos = pos + new Vector2((rect.Width - size.X) / 2, 0);
+            if (centerY) pos = pos + new Vector2(0, (rect.Height - size.Y) / 2);
 
             return pos;
         }

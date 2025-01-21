@@ -39,14 +39,18 @@ namespace CheckMate.Managers
             ChessState = ChessState.Opening;
             CurrentPlayer = PieceColour.White;
 
+            Clear();
+            Moves.Clear();
+        }
+
+        public void Clear()
+        {
             Move = Move.Null;
             SelectedPiece = Piece.Null;
             SelectedSquare = Square.Null;
 
             AllowedMoves.Clear();
             DisallowedMoves.Clear();
-
-            Moves.Clear();
         }
     }
 }
