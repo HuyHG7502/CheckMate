@@ -27,4 +27,5 @@ A simple C# project that simulates a semi-fully functional Chess game.
 
 ##
 ![CheckMate Screenshot 1](image-1.png)
+
 ![CheckMate Screenshot 2](image-2.png)
