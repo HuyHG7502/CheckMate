@@ -3,9 +3,13 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheckMate", "CheckMate.csproj", "{A8A9FD22-2DAF-410B-8F9B-D3F02E11312F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CheckMate.Game", "CheckMate.Game.csproj", "{A8A9FD22-2DAF-410B-8F9B-D3F02E11312F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Tests", "Tests\Tests.csproj", "{8CAF81A0-968B-4BED-A15B-F83BBDB2671C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckMate.Core", "CheckMate.Core\CheckMate.Core.csproj", "{A1EE5CB3-F5C9-4E15-B5EC-652C3E704FB6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckMate.UI", "CheckMate.UI\CheckMate.UI.csproj", "{768E1B1F-42D6-4EDC-A9B5-3CBD9B45BC4C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckMate.Tests", "CheckMate.Tests\CheckMate.Tests.csproj", "{E2F50361-FE77-05B3-42F3-0F982E9AD1E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +21,18 @@ Global
 		{A8A9FD22-2DAF-410B-8F9B-D3F02E11312F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A8A9FD22-2DAF-410B-8F9B-D3F02E11312F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A8A9FD22-2DAF-410B-8F9B-D3F02E11312F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8CAF81A0-968B-4BED-A15B-F83BBDB2671C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8CAF81A0-968B-4BED-A15B-F83BBDB2671C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8CAF81A0-968B-4BED-A15B-F83BBDB2671C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8CAF81A0-968B-4BED-A15B-F83BBDB2671C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1EE5CB3-F5C9-4E15-B5EC-652C3E704FB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1EE5CB3-F5C9-4E15-B5EC-652C3E704FB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1EE5CB3-F5C9-4E15-B5EC-652C3E704FB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1EE5CB3-F5C9-4E15-B5EC-652C3E704FB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{768E1B1F-42D6-4EDC-A9B5-3CBD9B45BC4C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{768E1B1F-42D6-4EDC-A9B5-3CBD9B45BC4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{768E1B1F-42D6-4EDC-A9B5-3CBD9B45BC4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{768E1B1F-42D6-4EDC-A9B5-3CBD9B45BC4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E2F50361-FE77-05B3-42F3-0F982E9AD1E9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E2F50361-FE77-05B3-42F3-0F982E9AD1E9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E2F50361-FE77-05B3-42F3-0F982E9AD1E9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E2F50361-FE77-05B3-42F3-0F982E9AD1E9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

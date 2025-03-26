@@ -1,5 +1,7 @@
-﻿using CheckMate.Managers;
-using CheckMate.UI;
+﻿using CheckMate.Config;
+using CheckMate.Helpers;
+using CheckMate.Managers;
+using CheckMate.UI.Menus;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -12,8 +14,8 @@ namespace CheckMate
         private readonly StateManager _state;
         
         private SpriteBatch _spriteBatch;
-        private GameManager _gameManager;
-        private Menu _menu;
+        private GameController _gameController;
+        private MenuController _menuController;
 
         Task _task;
         KeyboardState _previousKey;
@@ -38,6 +40,8 @@ namespace CheckMate
             _task = Task.CompletedTask;
             _state = new StateManager();
             _previousKey = new KeyboardState();
+
+            _state.Exit = () => Exit();
         }
 
         protected override void Initialize()
@@ -45,16 +49,29 @@ namespace CheckMate
             Window.Title = "Check Mate";
 
             // TODO: Add your initialization logic here
-            _graphics.PreferredBackBufferWidth = Constants.WIN_WIDTH;
-            _graphics.PreferredBackBufferHeight = Constants.WIN_HEIGHT;
-
+            // Setup defaul resolution for the project
+            _graphics.PreferredBackBufferWidth = GraphicsDevice.Adapter.CurrentDisplayMode.Width;
+            _graphics.PreferredBackBufferHeight = GraphicsDevice.Adapter.CurrentDisplayMode.Height;
+            _graphics.HardwareModeSwitch = false;
+            _graphics.IsFullScreen = false;
             _graphics.ApplyChanges();
 
+            Window.IsBorderless = false;
+            Window.Position = Point.Zero;
+
+            Layout.WinWidth = _graphics.PreferredBackBufferWidth;
+            Layout.WinHeight = _graphics.PreferredBackBufferHeight;
+            Layout.BoardOffsetX = (Layout.WinWidth - Layout.BoardSize) / 2;
+            Layout.BoardOffsetY = (Layout.WinHeight - Layout.BoardSize) / 2;
+            
             AssetManager _asset = new AssetManager(Content, _graphics.GraphicsDevice);
 
             _spriteBatch = new SpriteBatch(GraphicsDevice);
-            _gameManager = new GameManager(_state, _asset);
-            _menu = new Menu(_gameManager, _state, _asset, () => Exit());
+            _gameController = new GameController(_state, _asset);
+            _menuController = new MenuController(_state, _asset);
+
+            _menuController.Register(new StartMenu(_gameController));
+            _menuController.Register(new InGameMenu(_gameController));
 
             base.Initialize();
         }
@@ -74,11 +91,12 @@ namespace CheckMate
             if (IsActive)
             {
                 CheckInput(gameTime);
-                _menu.Update(gameTime);
+
+                _menuController.Update(gameTime);
 
                 if (_state.GameState == GameState.Playing && _task.IsCompleted)
                 {
-                    _task = _gameManager.Update(gameTime);
+                    _task = _gameController.Update(gameTime);
                     await _task;
                 }
             }
@@ -89,13 +107,13 @@ namespace CheckMate
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.Black);
+            GraphicsDevice.Clear(Colour.Vulcan);
 
             // TODO: Add your drawing code here
             _spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend);
 
-            _gameManager.Draw(_spriteBatch, gameTime);
-            _menu.Draw(_spriteBatch, gameTime);
+            _gameController.Draw(_spriteBatch, gameTime);
+            _menuController.Draw(_spriteBatch, gameTime);
 
             _spriteBatch.End();
 
@@ -140,26 +158,26 @@ namespace CheckMate
             if (_state.GameState == GameState.Start)
             {
                 // P key to toggle Single/Two-Player mode
-                if (IsKeyAllowed(Keys.P) && Util.IsKeyPressed(Keys.P, currentKey, _previousKey))
+                if (IsKeyAllowed(Keys.P) && GameUtil.IsKeyPressed(Keys.P, currentKey, _previousKey))
                     _state.SinglePlayer = !_state.SinglePlayer;
 
                 // S key to toggle Sides
-                if (IsKeyAllowed(Keys.S) && Util.IsKeyPressed(Keys.S, currentKey, _previousKey))
+                if (IsKeyAllowed(Keys.S) && GameUtil.IsKeyPressed(Keys.S, currentKey, _previousKey))
                     _state.PlayerColour = _state.PlayerColour == PieceColour.White ? PieceColour.Black : PieceColour.White;
 
                 // A key to toggle AI Strategy
-                if (IsKeyAllowed(Keys.A) && Util.IsKeyPressed(Keys.A, currentKey, _previousKey))
-                    _state.Strategy = Util.GetNextEnumValue(_state.Strategy);
+                if (IsKeyAllowed(Keys.A) && GameUtil.IsKeyPressed(Keys.A, currentKey, _previousKey))
+                    _state.Strategy = GameUtil.GetNextEnumValue(_state.Strategy);
 
                 // Numeric keys to toggle AI Depths
                 foreach (var depth in depths)
-                    if (IsKeyAllowed(depth.Key) && Util.IsKeyPressed(depth.Key, currentKey, _previousKey))
+                    if (IsKeyAllowed(depth.Key) && GameUtil.IsKeyPressed(depth.Key, currentKey, _previousKey))
                         _state.Depth = depth.Value;
             }
             */
 
             // Escape key to pause or exit game
-            if (IsKeyAllowed(Keys.Escape) && Util.IsKeyPressed(Keys.Escape, currentKey, _previousKey))
+            if (IsKeyAllowed(Keys.Escape) && GameUtil.IsKeyPressed(Keys.Escape, currentKey, _previousKey))
             {
                 switch (_state.GameState)
                 {
@@ -177,7 +195,7 @@ namespace CheckMate
             }
 
             // Space key to pause or resume game
-            if (IsKeyAllowed(Keys.Space) && Util.IsKeyPressed(Keys.Space, currentKey, _previousKey))
+            if (IsKeyAllowed(Keys.Space) && GameUtil.IsKeyPressed(Keys.Space, currentKey, _previousKey))
             {
                 switch (_state.GameState)
                 {
@@ -195,13 +213,13 @@ namespace CheckMate
             }
 
             // Enter key to play game
-            if (IsKeyAllowed(Keys.Enter) && Util.IsKeyPressed(Keys.Enter, currentKey, _previousKey))
+            if (IsKeyAllowed(Keys.Enter) && GameUtil.IsKeyPressed(Keys.Enter, currentKey, _previousKey))
             {
                 switch (_state.GameState)
                 {
                     case GameState.Start:
                         _state.GameState = GameState.Playing;
-                        _gameManager.Init();
+                        _gameController.Init();
                         break;
                     case GameState.Paused:
                         _state.GameState = GameState.Playing;
@@ -210,12 +228,12 @@ namespace CheckMate
             }
 
             // U key to undo a move
-            if (IsKeyAllowed(Keys.U) && Util.IsKeyPressed(Keys.U, currentKey, _previousKey))
-                _gameManager.Undo();
+            if (IsKeyAllowed(Keys.U) && GameUtil.IsKeyPressed(Keys.U, currentKey, _previousKey))
+                _gameController.Undo();
 
             // R key to reset game
-            if (IsKeyAllowed(Keys.R) && Util.IsKeyPressed(Keys.R, currentKey, _previousKey))
-                _gameManager.Init();
+            if (IsKeyAllowed(Keys.R) && GameUtil.IsKeyPressed(Keys.R, currentKey, _previousKey))
+                _gameController.Init();
 
             _previousKey = currentKey;
         }
